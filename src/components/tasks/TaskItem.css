@@ -1,0 +1,32 @@
+.agile-card {
+    background-color: #e8eef2;
+    max-height: 400px;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.title {
+    font-weight: bold;
+}
+
+.status {
+    background-color: green;
+    border-radius: 25px;
+    height: 10px;
+}
+
+.edit-icon {
+    background-color: transparent;
+    outline: none;
+    border: none;
+}
+
+.edit-icon:hover {
+    outline: none;
+}
+
+.edit-icon:active {
+    outline: none;
+    color: #46494c
+}
