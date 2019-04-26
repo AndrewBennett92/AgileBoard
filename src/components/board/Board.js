@@ -1,11 +1,14 @@
 import React, { Component } from "react";
-import TaskList from "../tasks/TaskList";
 import uuid from "uuid";
+import { DragDropContextProvider, DragDropContext } from "react-dnd";
+import HTML5Backend from "react-dnd-html5-backend";
+import DraggableList from "../DraggableList";
 
 export class Board extends Component {
   state = {
     sections: [
       {
+        id: uuid(),
         name: "Backlog",
         taskItems: [
           {
@@ -26,6 +29,7 @@ export class Board extends Component {
         ]
       },
       {
+        id: uuid(),
         name: "In Progress",
         taskItems: [
           {
@@ -78,23 +82,39 @@ export class Board extends Component {
     });
   };
 
+  moveList = (dragIndex, hoverIndex) => {
+    let sections = [...this.state.sections];
+    const draggedCard = { ...sections[dragIndex] };
+    sections.splice(dragIndex, 1);
+    sections.splice(hoverIndex, 0, draggedCard);
+
+    this.setState({
+      sections: sections
+    });
+  };
+
   render() {
     return (
       <div className="d-flex  mr-4">
-        {this.state.sections.map(section => {
-          return (
-            <TaskList
-              key={section.name}
-              title={section.name}
-              tasks={section.taskItems}
-              addTask={this.addTask}
-              updateCard={this.updateCard}
-            />
-          );
-        })}
+        <DragDropContextProvider backend={HTML5Backend}>
+          {this.state.sections.map((section, i) => {
+            return (
+              <DraggableList
+                key={section.id}
+                id={section.id}
+                index={i}
+                title={section.name}
+                tasks={section.taskItems}
+                addTask={this.addTask}
+                updateCard={this.updateCard}
+                moveList={this.moveList}
+              />
+            );
+          })}
+        </DragDropContextProvider>
       </div>
     );
   }
 }
 
-export default Board;
+export default DragDropContext(HTML5Backend)(Board);

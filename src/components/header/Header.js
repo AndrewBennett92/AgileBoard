@@ -7,7 +7,7 @@ export class Header extends Component {
     return (
       <header style={headerStyle}>
         <div className="d-flex p-2 flex-row">
-          <h1 className="mr-auto">Agile Board</h1>
+          <h1 className="mr-auto">Kanban Board</h1>
           <div className="d-flex align-items-end pe-4">
             <div style={{ color: "#fff" }} className="p-2 bd-highlight">
               Welcome, {this.props.name}

@@ -49,6 +49,7 @@ export class TaskList extends Component {
   updateTaskItem = updatedTask => {
     this.props.updateCard({ sectionName: this.props.title, card: updatedTask });
   };
+
   render() {
     const addCardButton = () => {
       if (this.state.newTaskInProgress) {
@@ -64,9 +65,11 @@ export class TaskList extends Component {
         );
       } else {
         return (
-          <button style={addCardStyle} onClick={this.addPlaceholderCard}>
-            +
-          </button>
+          <div className="d-flex justify-content-center">
+            <button style={addCardStyle} onClick={this.addPlaceholderCard}>
+              +
+            </button>
+          </div>
         );
       }
     };
@@ -83,11 +86,9 @@ export class TaskList extends Component {
         </form>
       );
     };
+
     return (
-      <div
-        style={containerStyle}
-        className="d-flex flex-column col-sm-2 align-self-start"
-      >
+      <div>
         <span style={{ color: "white" }}>{this.props.title}</span>
         {this.props.tasks.map(task => {
           return (
@@ -120,13 +121,6 @@ const addCardStyle = {
   width: "35px",
   height: "35px",
   outline: "none"
-};
-
-const containerStyle = {
-  backgroundColor: "#006494",
-  margin: "5px",
-  padding: "10px",
-  borderRadius: "5px"
 };
 
 export default TaskList;
