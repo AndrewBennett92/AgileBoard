@@ -10,6 +10,11 @@ export class TaskItem extends Component {
       tempTitle: ""
     };
   }
+
+  /**
+   * Toggles the edit state of the card from what it currently is. Resets any information that might have been
+   * input by the user.
+   */
   editTask = () => {
     this.setState({
       edit: !this.state.edit,
@@ -17,13 +22,13 @@ export class TaskItem extends Component {
     });
   };
 
-  changed = e => {
+  handleTitleChanged = e => {
     this.setState({
       tempTitle: e.target.value
     });
   };
 
-  saveTitleUpdate = e => {
+  saveTitleChanges = e => {
     e.preventDefault();
     this.props.updateTask({
       id: this.props.task.id,
@@ -34,25 +39,8 @@ export class TaskItem extends Component {
     });
   };
   render() {
-    const { description, title } = this.props.task;
+    const { title } = this.props.task;
 
-    const cardTitle = () => {
-      if (this.state.edit) {
-        return (
-          <form onSubmit={this.saveTitleUpdate}>
-            <input
-              type="text"
-              onSubmit={this.saveTitleUpdate}
-              onChange={this.changed}
-              value={this.state.tempTitle}
-              autoFocus
-            />
-          </form>
-        );
-      } else {
-        return <div className="title">{title}</div>;
-      }
-    };
     return (
       <div className="agile-card">
         <div className="d-flex">
@@ -61,10 +49,19 @@ export class TaskItem extends Component {
             <i className="fas fa-pencil-alt" />
           </button>
         </div>
-
-        {cardTitle()}
-
-        <div>{description}</div>
+        {this.state.edit ? (
+          <form onSubmit={this.saveTitleChanges}>
+            <input
+              type="text"
+              onSubmit={this.saveTitleChanges}
+              onChange={this.handleTitleChanged}
+              value={this.state.tempTitle}
+              autoFocus
+            />
+          </form>
+        ) : (
+          <div className="title">{title}</div>
+        )}
       </div>
     );
   }
@@ -72,7 +69,8 @@ export class TaskItem extends Component {
 
 TaskItem.propType = {
   title: PropType.string,
-  description: PropType.string
+  description: PropType.string,
+  updateTask: PropType.func.isRequired
 };
 
 export default TaskItem;

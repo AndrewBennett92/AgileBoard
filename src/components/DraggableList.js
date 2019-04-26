@@ -1,5 +1,5 @@
 import React, { useImperativeHandle, useRef } from "react";
-import TaskList from "./tasks/TaskList";
+import TaskList from "./tasks/task-list/TaskList";
 import { DragSource, DropTarget } from "react-dnd";
 
 const draggableList = React.forwardRef((props, ref) => {
@@ -68,6 +68,7 @@ export default DropTarget(
     },
     (connect, monitor) => ({
       connectDragSource: connect.dragSource(),
+      connectDragPreview: connect.dragPreview(),
       isDragging: monitor.isDragging()
     })
   )(draggableList)
