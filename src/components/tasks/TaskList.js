@@ -84,7 +84,10 @@ export class TaskList extends Component {
       );
     };
     return (
-      <div style={containerStyle} className="d-flex flex-column col-sm-2">
+      <div
+        style={containerStyle}
+        className="d-flex flex-column col-sm-2 align-self-start"
+      >
         <span style={{ color: "white" }}>{this.props.title}</span>
         {this.props.tasks.map(task => {
           return (

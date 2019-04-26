@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import TaskList from "../tasks/TaskList";
+import uuid from "uuid";
 
 export class Board extends Component {
   state = {
@@ -8,14 +9,19 @@ export class Board extends Component {
         name: "Backlog",
         taskItems: [
           {
-            id: 1,
+            id: uuid(),
             title: "task 1",
             description: "task desc this needs to be longer"
           },
           {
-            id: 2,
+            id: uuid(),
             title: "task 2",
             description: "task desc 2"
+          },
+          {
+            id: uuid(),
+            title: "task 3",
+            description: "task desc 3"
           }
         ]
       },
@@ -42,7 +48,7 @@ export class Board extends Component {
     const updatedSectionList = sections.map(section => {
       if (section.name === task.listName) {
         section.taskItems.push({
-          id: 3,
+          id: uuid(),
           title: task.task,
           description: "boobs"
         });
@@ -74,7 +80,7 @@ export class Board extends Component {
 
   render() {
     return (
-      <div className="d-flex mr-4">
+      <div className="d-flex  mr-4">
         {this.state.sections.map(section => {
           return (
             <TaskList
