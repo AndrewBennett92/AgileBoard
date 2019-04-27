@@ -1,8 +1,31 @@
 import React, { Component } from "react";
 import uuid from "uuid";
-import { DragDropContext } from "react-dnd";
-import HTML5Backend from "react-dnd-html5-backend";
-import DraggableList from "../DraggableList";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import TaskList from "../tasks/task-list/TaskList";
+
+const getItemStyle = (isDragging, draggableStyle) => {
+  return {
+    // some basic styles to make the items look a bit nicer
+    userSelect: "none",
+    padding: "10px",
+    borderRadius: "5px",
+    margin: "5px",
+    backgroundColor: isDragging ? "#0582ca" : "#006494",
+    transform: [{ rotateY: "60deg" }],
+
+    // styles we need to apply on draggables
+    ...draggableStyle
+  };
+};
+
+// a little function to help us with reordering the result
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
 
 export class Board extends Component {
   state = {
@@ -120,23 +143,71 @@ export class Board extends Component {
       newLaneTitle: e.target.value
     });
   };
+
+  onDragEnd = result => {
+    console.log("called drag end");
+    // dropped outside the list
+    if (!result.destination) {
+      return;
+    }
+
+    const items = reorder(
+      this.state.sections,
+      result.source.index,
+      result.destination.index
+    );
+
+    this.setState({
+      sections: items
+    });
+  };
   render() {
     return (
-      <div className="d-flex  mr-4">
-        {this.state.sections.map((section, i) => {
-          return (
-            <DraggableList
-              key={section.id}
-              id={section.id}
-              index={i}
-              title={section.name}
-              tasks={section.taskItems}
-              addTask={this.addTask}
-              updateCard={this.updateCard}
-              moveList={this.moveList}
-            />
-          );
-        })}
+      <React.Fragment>
+        <DragDropContext onDragEnd={this.onDragEnd}>
+          <Droppable
+            droppableId="droppable"
+            type="COLUMN"
+            direction="horizontal"
+          >
+            {provided => (
+              <div className="d-flex" ref={provided.innerRef}>
+                {this.state.sections.map((section, index) => (
+                  <Draggable
+                    key={section.id}
+                    draggableId={section.id}
+                    index={index}
+                  >
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className="d-flex flex-column col-sm-2 align-self-start"
+                        style={getItemStyle(
+                          snapshot.isDragging,
+                          provided.draggableProps.style
+                        )}
+                      >
+                        <TaskList
+                          key={section.id}
+                          id={section.id}
+                          index={index}
+                          title={section.name}
+                          tasks={section.taskItems}
+                          addTask={this.addTask}
+                          updateCard={this.updateCard}
+                          moveList={this.moveList}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
         {this.state.addLane ? (
           <form onSubmit={this.addLane}>
             <input
@@ -156,9 +227,9 @@ export class Board extends Component {
             </button>
           </form>
         )}
-      </div>
+      </React.Fragment>
     );
   }
 }
 
-export default DragDropContext(HTML5Backend)(Board);
+export default Board;
