@@ -8,7 +8,7 @@ export default function Avatar() {
 const avatarStyle = {
   height: "50px",
   width: "50px",
-  border: "2px solid #449dd1",
+  border: "2px solid #82a0bc",
   borderRadius: "50px",
   padding: "2px"
 };

@@ -1,21 +1,32 @@
 import React, { Component } from "react";
 import TaskItem from "../task-item/TaskItem";
+import styled from "styled-components";
 import NewTask from "../task-item/NewTask";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { Draggable, Droppable } from "react-beautiful-dnd";
 
-const getItemStyle = (isDragging, draggableStyle) => ({
-  // some basic styles to make the items look a bit nicer
-  userSelect: "none",
-  padding: "10px",
-  borderRadius: "5px",
-  margin: "5px",
-  backgroundColor: isDragging ? "#0582ca" : "#006494",
+const Container = styled.div`
+  margin: 8px;
+  border-radius: 2px;
+  width: 350px;
+  background-color: #82a0bc;
+  color: #fffbfe;
+  min-height: 100px;
+  padding-bottom: 10px;
+`;
+const Title = styled.h4`
+  padding: 8px;
+`;
 
-  // styles we need to apply on draggables
-  ...draggableStyle
-});
+const Tasks = styled.div`
+  padding: 8px;
+`;
 
-export class TaskList extends Component {
+const AddTask = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+class TaskList extends Component {
   state = {
     newTaskInProgress: false
   };
@@ -49,61 +60,57 @@ export class TaskList extends Component {
     });
   };
 
-  onDragEnd = () => {
-    console.log("drag end");
-  };
-
   render() {
     return (
       <div>
-        <span style={{ color: "white" }}>{this.props.title}</span>
-        <DragDropContext onDragEnd={this.onDragEnd}>
-          <Droppable droppableId="task" type="column" direction="vertical">
-            {provided => (
-              <div ref={provided.innerRef}>
-                {this.props.tasks.map((task, index) => (
-                  <Draggable key={task.id} draggableId={task.id} index={index}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        style={getItemStyle(
-                          snapshot.isDragging,
-                          provided.draggableProps.style
-                        )}
-                      >
-                        <TaskItem
-                          key={task.id}
-                          task={task}
-                          updateTask={this.updateTaskItem}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-
-        {this.state.newTaskInProgress ? (
-          <NewTask addTask={this.addNewTask} cancelTask={this.cancelNewTask} />
-        ) : (
-          <div className="d-flex justify-content-center">
-            <button style={addCardStyle} onClick={this.addPlaceholderCard}>
-              +
-            </button>
-          </div>
-        )}
+        <Draggable
+          draggableId={this.props.id}
+          index={this.props.index}
+          type="column"
+        >
+          {provided => (
+            <Container {...provided.draggableProps} ref={provided.innerRef}>
+              <Title {...provided.dragHandleProps}>{this.props.title}</Title>
+              <Droppable droppableId={this.props.id} type="task">
+                {provided => (
+                  <Tasks ref={provided.innerRef} {...provided.droppableProps}>
+                    {this.props.tasks.map((task, index) => (
+                      <TaskItem
+                        key={task.id}
+                        index={index}
+                        task={task}
+                        updateTask={this.updateTaskItem}
+                      />
+                    ))}
+                    {provided.placeholder}
+                  </Tasks>
+                )}
+              </Droppable>
+              {this.state.newTaskInProgress ? (
+                <NewTask
+                  addTask={this.addNewTask}
+                  cancelTask={this.cancelNewTask}
+                />
+              ) : (
+                <AddTask>
+                  <button
+                    style={addCardStyle}
+                    onClick={this.addPlaceholderCard}
+                  >
+                    +
+                  </button>
+                </AddTask>
+              )}
+            </Container>
+          )}
+        </Draggable>
       </div>
     );
   }
 }
 
 const addCardStyle = {
-  backgroundColor: "#46494c",
+  backgroundColor: "#545e75",
   fontWeight: "bold",
   border: "none",
   color: "white",
@@ -114,7 +121,8 @@ const addCardStyle = {
   borderRadius: "50px",
   width: "35px",
   height: "35px",
-  outline: "none"
+  outline: "none",
+  marginBottom: "10px"
 };
 
 export default TaskList;

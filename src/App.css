@@ -1,15 +1,15 @@
 body {
-  background-color: #dcdcdd;
+  background-color: #fffbfe;
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.4;
 }
 
 .primary-button {
-  border: 3px solid white;
+  border: 1px solid white;
   font-family: inherit;
   font-size: inherit;
   color: white;
-  background: rgb(70, 73, 76);
+  background-color: #545e75;
   cursor: pointer;
   padding: 5px;
   display: inline-block;
@@ -26,4 +26,9 @@ body {
 .primary-button:hover {
   color: #0e83cd;
   background: #fff;
+}
+
+input {
+  border: none;
+  border-bottom: 2px solid #82a0bc
 }

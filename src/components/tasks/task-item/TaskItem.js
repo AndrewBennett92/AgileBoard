@@ -1,6 +1,14 @@
 import React, { Component } from "react";
 import PropType from "prop-types";
 import "./TaskItem.css";
+import { Draggable } from "react-beautiful-dnd";
+import styled from "styled-components";
+
+const Container = styled.div`
+  margin-bottom: 8px;
+  border-radius: 2px;
+  color: black;
+`;
 
 export class TaskItem extends Component {
   constructor(props) {
@@ -38,31 +46,46 @@ export class TaskItem extends Component {
       edit: false
     });
   };
+
   render() {
     const { title } = this.props.task;
 
     return (
-      <div className="agile-card">
-        <div className="d-flex">
-          <div className="col-sm-4 status mr-auto" />
-          <button onClick={this.editTask} className="edit-icon">
-            <i className="fas fa-pencil-alt" />
-          </button>
-        </div>
-        {this.state.edit ? (
-          <form onSubmit={this.saveTitleChanges}>
-            <input
-              type="text"
-              onSubmit={this.saveTitleChanges}
-              onChange={this.handleTitleChanged}
-              value={this.state.tempTitle}
-              autoFocus
-            />
-          </form>
-        ) : (
-          <div className="title">{title}</div>
+      <Draggable
+        draggableId={this.props.task.id}
+        index={this.props.index}
+        type="task"
+      >
+        {provided => (
+          <Container
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            ref={provided.innerRef}
+          >
+            <div className="agile-card">
+              <div className="d-flex">
+                <div className="col-sm-4 status mr-auto" />
+                <button onClick={this.editTask} className="edit-icon">
+                  <i className="fas fa-pencil-alt" />
+                </button>
+              </div>
+              {this.state.edit ? (
+                <form onSubmit={this.saveTitleChanges}>
+                  <input
+                    type="text"
+                    onSubmit={this.saveTitleChanges}
+                    onChange={this.handleTitleChanged}
+                    value={this.state.tempTitle}
+                    autoFocus
+                  />
+                </form>
+              ) : (
+                <div className="title">{title}</div>
+              )}
+            </div>
+          </Container>
         )}
-      </div>
+      </Draggable>
     );
   }
 }

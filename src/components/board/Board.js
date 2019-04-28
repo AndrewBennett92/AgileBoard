@@ -1,76 +1,18 @@
 import React, { Component } from "react";
-import uuid from "uuid";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import TaskList from "../tasks/task-list/TaskList";
-
-const getItemStyle = (isDragging, draggableStyle) => {
-  return {
-    // some basic styles to make the items look a bit nicer
-    userSelect: "none",
-    padding: "10px",
-    borderRadius: "5px",
-    margin: "5px",
-    backgroundColor: isDragging ? "#0582ca" : "#006494",
-    transform: [{ rotateY: "60deg" }],
-
-    // styles we need to apply on draggables
-    ...draggableStyle
-  };
-};
-
-// a little function to help us with reordering the result
-const reorder = (list, startIndex, endIndex) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-
-  return result;
-};
+import initialData from "../../initial-data";
+import uuid from "uuid";
 
 export class Board extends Component {
-  state = {
-    sections: [
-      {
-        id: uuid(),
-        name: "Backlog",
-        taskItems: [
-          {
-            id: uuid(),
-            title: "task 1",
-            description: "task desc this needs to be longer"
-          },
-          {
-            id: uuid(),
-            title: "task 2",
-            description: "task desc 2"
-          },
-          {
-            id: uuid(),
-            title: "task 3",
-            description: "task desc 3"
-          }
-        ]
-      },
-      {
-        id: uuid(),
-        name: "In Progress",
-        taskItems: [
-          {
-            id: 1,
-            title: "progress task 1",
-            description: "task desc this needs to be longer"
-          },
-          {
-            id: 2,
-            title: "progress task 2",
-            description: "task desc 2"
-          }
-        ]
-      }
-    ],
-    addLane: false,
-    newLaneTitle: ""
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      sections: initialData,
+      addLane: false,
+      newLaneTitle: ""
+    };
+  }
 
   addTask = task => {
     let sections = [...this.state.sections];
@@ -107,127 +49,135 @@ export class Board extends Component {
     });
   };
 
-  moveList = (dragIndex, hoverIndex) => {
-    let sections = [...this.state.sections];
-    const draggedCard = { ...sections[dragIndex] };
-    sections.splice(dragIndex, 1);
-    sections.splice(hoverIndex, 0, draggedCard);
-
-    this.setState({
-      sections: sections
-    });
-  };
-
-  addLane = e => {
-    e.preventDefault();
-    this.setState({
-      sections: [
-        ...this.state.sections,
-        { id: uuid(), name: this.state.newLaneTitle, taskItems: [] }
-      ],
-      addLane: false,
-      newLaneTitle: ""
-    });
-  };
-
-  displayNewLane = e => {
-    e.preventDefault();
-    this.setState({
-      addLane: true,
-      newLaneTitle: ""
-    });
-  };
-
-  handleInput = e => {
-    this.setState({
-      newLaneTitle: e.target.value
-    });
-  };
-
   onDragEnd = result => {
-    console.log("called drag end");
-    // dropped outside the list
-    if (!result.destination) {
+    const { destination, source, type, draggableId } = result;
+
+    if (!destination) return;
+
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    )
+      return;
+
+    if (type === "column") {
+      const columns = Array.from(this.state.sections);
+      const columnId = this.state.sections.findIndex(section => {
+        if (section.id === draggableId) return true;
+        return false;
+      });
+      const copyCol = { ...columns[columnId] };
+      columns.splice(source.index, 1);
+      columns.splice(destination.index, 0, copyCol);
+
+      const newState = {
+        ...this.state,
+        sections: columns
+      };
+      this.setState(newState);
       return;
     }
 
-    const items = reorder(
-      this.state.sections,
-      result.source.index,
-      result.destination.index
-    );
+    const start = source.droppableId;
+    const finish = destination.droppableId;
 
-    this.setState({
-      sections: items
+    if (start === finish) {
+      const sections = [...this.state.sections];
+      const sectionIndex = sections.findIndex(section => {
+        if (section.id === source.droppableId) return true;
+        return false;
+      });
+      const column = sections[sectionIndex];
+      const newTaskIds = Array.from(column.taskItems);
+      const draggedTask = { ...newTaskIds[source.index] };
+
+      newTaskIds.splice(source.index, 1);
+      newTaskIds.splice(destination.index, 0, draggedTask);
+      sections[sectionIndex].taskItems = newTaskIds;
+
+      this.setState({
+        sections: sections
+      });
+      return;
+    }
+
+    // When columns are different
+    const sections = [...this.state.sections];
+
+    // Find the section column index for the starting point
+    const startSectionIndex = sections.findIndex(section => {
+      if (section.id === source.droppableId) return true;
+      return false;
     });
+    // Get the actual section
+    const startSection = { ...sections[startSectionIndex] };
+    // Item that has been dragged
+    const draggedItem = startSection.taskItems[source.index];
+
+    // List of tasks on the start section. Remove the item and set the new section object
+    const startTaskIds = Array.from(sections[startSectionIndex].taskItems);
+    startTaskIds.splice(source.index, 1);
+    const newStart = {
+      ...startSection,
+      taskItems: startTaskIds
+    };
+
+    // Find the section column index for the destination point
+    const endSectionIndex = sections.findIndex(section => {
+      if (section.id === destination.droppableId) return true;
+      return false;
+    });
+
+    // Get the actual section
+    const endSection = { ...sections[endSectionIndex] };
+
+    // List of tasks on the end section. Slot in the new task
+    const endTaskIds = Array.from(sections[endSectionIndex].taskItems);
+    endTaskIds.splice(destination.index, 0, draggedItem);
+    const newEnd = {
+      ...endSection,
+      taskItems: endTaskIds
+    };
+
+    sections[startSectionIndex] = newStart;
+    sections[endSectionIndex] = newEnd;
+
+    const newState = {
+      ...this.state,
+      sections: sections
+    };
+
+    this.setState(newState);
   };
   render() {
     return (
-      <React.Fragment>
-        <DragDropContext onDragEnd={this.onDragEnd}>
-          <Droppable
-            droppableId="droppable"
-            type="COLUMN"
-            direction="horizontal"
-          >
+      <DragDropContext onDragEnd={this.onDragEnd}>
+        <div style={{ marginTop: "20px" }}>
+          <Droppable droppableId="board" direction="horizontal" type="column">
             {provided => (
-              <div className="d-flex" ref={provided.innerRef}>
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                style={{ display: "flex" }}
+              >
                 {this.state.sections.map((section, index) => (
-                  <Draggable
+                  <TaskList
                     key={section.id}
-                    draggableId={section.id}
+                    id={section.id}
                     index={index}
-                  >
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="d-flex flex-column col-sm-2 align-self-start"
-                        style={getItemStyle(
-                          snapshot.isDragging,
-                          provided.draggableProps.style
-                        )}
-                      >
-                        <TaskList
-                          key={section.id}
-                          id={section.id}
-                          index={index}
-                          title={section.name}
-                          tasks={section.taskItems}
-                          addTask={this.addTask}
-                          updateCard={this.updateCard}
-                          moveList={this.moveList}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
+                    title={section.name}
+                    tasks={section.taskItems}
+                    addTask={this.addTask}
+                    updateCard={this.updateCard}
+                    moveList={this.moveList}
+                  />
                 ))}
                 {provided.placeholder}
               </div>
             )}
           </Droppable>
-        </DragDropContext>
-        {this.state.addLane ? (
-          <form onSubmit={this.addLane}>
-            <input
-              autoFocus
-              value={this.state.newLaneTitle}
-              onChange={this.handleInput}
-            />
-            <button onSubmit={this.addLane}>+</button>
-          </form>
-        ) : (
-          <form onSubmit={this.displayNewLane}>
-            <button
-              style={{ backgroundColor: "transparent", border: "none" }}
-              onSubmit={this.displayNewLane}
-            >
-              Add lane +
-            </button>
-          </form>
-        )}
-      </React.Fragment>
+        </div>
+      </DragDropContext>
     );
   }
 }

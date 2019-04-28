@@ -1,4 +1,13 @@
 import React, { Component } from "react";
+import styled from "styled-components";
+
+const Container = styled.div`
+  padding: 10px;
+  background-color: white;
+  margin: 8px;
+  margin-top: 0px;
+  border-radius: 5px;
+`;
 
 export class NewTask extends Component {
   state = {
@@ -23,17 +32,22 @@ export class NewTask extends Component {
   render() {
     return (
       <React.Fragment>
-        <form action="submit" onSubmit={this.addCard}>
-          <input
-            autoFocus
-            type="text"
-            value={this.state.title}
-            onSubmit={this.addCard}
-            onChange={this.handleTaskNameChanged}
-          />
-        </form>
-
-        <div className="d-flex mt-2">
+        <Container>
+          <form action="submit" onSubmit={this.addCard}>
+            <input
+              autoFocus
+              type="text"
+              value={this.state.title}
+              onSubmit={this.addCard}
+              onChange={this.handleTaskNameChanged}
+              placeholder="Task title"
+              style={{ width: "100%" }}
+              maxLength="120"
+              required
+            />
+          </form>
+        </Container>
+        <div className="d-flex m-2">
           <button className="primary-button" onClick={this.addCard}>
             Add Card
           </button>
@@ -47,7 +61,7 @@ export class NewTask extends Component {
 }
 
 const addCardStyle = {
-  backgroundColor: "#46494c",
+  backgroundColor: "#545e75",
   fontWeight: "bold",
   border: "none",
   color: "white",

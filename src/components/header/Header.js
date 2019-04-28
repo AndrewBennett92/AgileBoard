@@ -25,7 +25,7 @@ Header.propTypes = {
 };
 
 const headerStyle = {
-  backgroundColor: "#46494c",
+  backgroundColor: "#304d6d",
   boxShadow: "0 4px 2px -2px gray",
   color: "white",
   padding: "0px 15px"
